@@ -10,7 +10,7 @@ services:
             - MYSQL_USER=app
             - MYSQL_PASSWORD=yourpassword
         ports:
-            - "13306:3306"
+            - "3306:3306"
         networks:
             - laravel
 
