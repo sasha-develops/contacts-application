@@ -37,8 +37,17 @@ ssh:
 ssh-queue:
 	docker exec -it $(APP_CONTAINER) /bin/sh
 
-# Run migration
-migrate:
+# Wait for database to be ready
+wait-for-db:
+	@echo "Waiting for database to be ready..."
+	@until docker exec $(APP_CONTAINER) php -r "new PDO('mysql:host=db;port=3306;dbname=contacts_db', 'app', 'yourpassword');" 2>/dev/null; do \
+		echo "Database not ready yet, waiting..."; \
+		sleep 2; \
+	done
+	@echo "Database is ready!"
+
+# Run migration (with database wait)
+migrate: wait-for-db
 	docker exec -it $(APP_CONTAINER) php artisan migrate
 
 # Seed test data
@@ -56,7 +65,12 @@ clear-cache:
 # Run PHP unit tests
 test:
 	docker exec -it $(APP_CONTAINER) php artisan test
+# Generate application key (auto-creates .env if missing)
 key:
+	@if [ ! -f .env ]; then \
+		echo "Creating .env file from .env.example..."; \
+		cp .env.example .env; \
+	fi
 	docker exec -it $(APP_CONTAINER) php artisan key:generate
 
-.PHONY: rebuild clean-all clean build install start stop ssh test
+.PHONY: rebuild clean-all clean build install start stop ssh test wait-for-db

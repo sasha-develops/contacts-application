@@ -61,7 +61,22 @@ Follow these steps to set up the application:
 
 ### Quick Setup (Recommended)
 
-From the project root directory:
+**Option 1: Automatic Setup Script** ⭐
+
+```bash
+# Clone and navigate to the project
+cd contacts-application
+
+# 🚀 AUTOMATIC ENVIRONMENT SETUP (fixes common issues)
+./setup-env.sh
+
+# Add your Pusher credentials to backend/.env and frontend/.env
+
+# START EVERYTHING
+make start-all
+```
+
+**Option 2: Manual Environment Setup**
 
 ```bash
 # Clone and navigate to the project
@@ -72,11 +87,18 @@ cd backend && cp .env.example .env
 cd ../frontend && cp .env.example .env
 cd ..
 
+# IMPORTANT: Check that backend/.env has DB_PORT=3306 (not 13306)
 # Add your Pusher credentials to backend/.env and frontend/.env
 
 # 🚀 ONE COMMAND TO START EVERYTHING
 make start-all
 ```
+
+**The automatic setup script (`./setup-env.sh`) handles:**
+- Creates `.env` files from examples
+- Fixes `DB_PORT` configuration (3306 vs 13306 issue)
+- Sets default `APP_KEY` for take-home assignment
+- Provides clear next steps
 
 This single command will:
 - Build and start the backend Docker containers
@@ -164,18 +186,23 @@ The frontend will be available at: http://localhost:3000
 
 1. **Port conflicts**: If ports 3306, 8080, or 3000 are in use, stop conflicting services or modify the ports in docker-compose.yml
 
-2. **Permission issues**: If you encounter permission errors:
+2. **Database connection issues during setup**: 
+   - If you get "Connection refused" errors during migration, the system now includes automatic database health checks
+   - If the issue persists, manually check that your `.env` file has `DB_PORT=3306` (not 13306)
+   - The database container may take 30-40 seconds to fully initialize on first run
+
+3. **APP_KEY issues** ("No APP_KEY variable found"):
+   - Use the automatic setup script: `./setup-env.sh` (recommended for take-home assignment)
+   - Or manually run: `make key` (will auto-create .env if missing)
+   - The setup script includes a default APP_KEY suitable for QA take-home assignments
+
+4. **Permission issues**: If you encounter permission errors:
    ```bash
    make clean
    make rebuild
    ```
 
-3. **Database connection issues**: Ensure the database container is running:
-   ```bash
-   docker ps
-   ```
-
-4. **Missing dependencies**: If Composer or npm fails, try:
+5. **Missing dependencies**: If Composer or npm fails, try:
    ```bash
    # Backend
    make clean && make rebuild
